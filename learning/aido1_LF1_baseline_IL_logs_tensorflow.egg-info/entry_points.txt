@@ -1,0 +1,3 @@
+[console_scripts]
+LF_IL_tensorflow-start = AIDO18_LF_IL_tensorflow.launcher:main
+
