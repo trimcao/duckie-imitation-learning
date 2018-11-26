@@ -43,7 +43,7 @@ def solve(gym_environment, cis):
     x = graph.get_tensor_by_name('prefix/x:0')
     # change the output name
     # y = graph.get_tensor_by_name('prefix/ConvNet/fc_layer_2/BiasAdd:0')
-    y = graph.get_tensor_by_name('prefix/ConvNet/Flatten/flatten/Reshape:0')
+    y = graph.get_tensor_by_name('prefix/ConvNet/pred/pred/BiasAdd:0')
     # We launch a Session
     with tf.Session(graph=graph) as sess:
 

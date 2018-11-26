@@ -92,8 +92,11 @@ class CNN_training:
         exp = 6  # expansion ratio
         is_train=True
         reuse=False
-        num_classes = 2
+        num_classes = 128
         with tf.variable_scope('ConvNet', reuse=tf.AUTO_REUSE):
+            # # define the 4-d tensor expected by TensorFlow
+            # # [-1: arbitrary num of images, img_height, img_width, num_channels]
+            # x_img = tf.reshape(x, [-1, 48, 96, 1])
             net = conv2d_block(x, 32, 3, 2, is_train, name='conv1_1')  # size/2
 
             net = res_block(net, 1, 16, 1, is_train, name='res2_1')
@@ -122,39 +125,11 @@ class CNN_training:
 
             net = pwise_block(net, 1280, is_train, name='conv9_1')
             net = global_avg(net)
-            pred = flatten(conv_1x1(net, num_classes, name='pred'))
-
+            net = flatten(conv_1x1(net, num_classes, name='beforepred'))
+            pred = dense(net, 2, name='pred')
             # pred = tf.nn.softmax(logits, name='prob')
             return pred
 
-            # # define the 4-d tensor expected by TensorFlow
-            # # [-1: arbitrary num of images, img_height, img_width, num_channels]
-            # x_img = tf.reshape(x, [-1, 48, 96, 1])
-
-            # # define 1st convolutional layer
-            # hl_conv_1 = tf.layers.conv2d(x_img, kernel_size=5, filters=2, padding="valid",
-            #                              activation=tf.nn.relu, name="conv_layer_1")
-
-            # max_pool_1 = tf.layers.max_pooling2d(hl_conv_1, pool_size=2, strides=2)
-
-            # # define 2nd convolutional layer
-            # hl_conv_2 = tf.layers.conv2d(max_pool_1, kernel_size=5, filters=8, padding="valid",
-            #                              activation=tf.nn.relu, name="conv_layer_2")
-
-            # max_pool_2 = tf.layers.max_pooling2d(hl_conv_2, pool_size=2, strides=2)
-
-            # # flatten tensor to connect it with the fully connected layers
-            # conv_flat = tf.layers.flatten(max_pool_2)
-
-            # # add 1st fully connected layers to the neural network
-            # hl_fc_1 = tf.layers.dense(inputs=conv_flat, units=64, activation=tf.nn.relu, name="fc_layer_1")
-
-            # # add 2nd fully connected layers to predict the driving commands
-            # hl_fc_2 = tf.layers.dense(inputs=hl_fc_1, units=2, name="fc_layer_2")
-
-            # return hl_fc_2
-
-            
 
     def epoch_iteration(self, data_size, x_data, y_data, mode):
         '''
@@ -262,11 +237,11 @@ class CNN_training:
                 test_writer.add_summary(man_loss_summary, epoch)
 
                 # print train and test loss to monitor progress during training every 50 epochs
-                if epoch % 50 == 0:
+                if epoch % 10 == 0:
                     print("Epoch: {:04d} , train_loss = {:.6f} , test_loss = {:.6f}".format(epoch+1, avg_train_loss, avg_test_loss))
 
                 # save weights every 100 epochs
-                if epoch % 100 == 0:
+                if epoch % 30 == 0:
                     saver.save(self.sess, logs_train_path, epoch)
 
         # close summary writer

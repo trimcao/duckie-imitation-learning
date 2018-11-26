@@ -116,6 +116,12 @@ def global_avg(x):
         net=tf.layers.average_pooling2d(x, x.get_shape()[1:-1], 1)
         return net
 
+def dense(x, units, name='dense'):
+    with tf.name_scope(name):
+        net = tf.layers.dense(x, units=units, name=name)
+        # net = relu(net)
+        return net
+
 
 def flatten(x):
     #flattened=tf.reshape(input,[x.get_shape().as_list()[0], -1])  # or, tf.layers.flatten(x)
