@@ -27,6 +27,7 @@ def load_data(file_path):
     images = df_img['img'][0]
 
     print('The dataset is loaded: {} images and {} omega velocities.'.format(images.shape[0], velocities.shape[0]))
+    print('The image shape is', images.shape)
 
     if not images.shape[0] == velocities.shape[0]:
         raise ValueError("The number of images and velocities must be the same.")
@@ -207,11 +208,12 @@ class CNN_training:
         man_loss_summary.value.add(tag='Loss', simple_value=None)
 
         # define placeholder variable for input images (each images is a row vector [1, 4608 = 48x96x1])
-        self.x = tf.placeholder(tf.float16, shape=[None, 48 * 96], name='x')
+        # self.x = tf.placeholder(tf.float16, shape=[None, 48 * 96], name='x')
+        self.x = tf.placeholder(tf.float32, shape=[None, 48, 96, 3], name='x')
 
         # define placeholder for the true omega velocities
         # [None: tensor may hold arbitrary num of velocities, number of omega predictions for each image]
-        self.vel_true = tf.placeholder(tf.float16, shape=[None, 2], name="vel_true")
+        self.vel_true = tf.placeholder(tf.float32, shape=[None, 2], name="vel_true")
         self.vel_pred = self.model(self.x)
 
         self.loss = self.loss_function()

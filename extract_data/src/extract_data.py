@@ -125,9 +125,9 @@ def main():
             #### direct conversion to CV2 ####
             # np_arr = np.fromstring(img.data, np.uint8)
             # img = cv2.imdecode(np_arr, cv2.CV_LOAD_IMAGE_COLOR)
-            # print("img", img, img.shape)
             img = cvbridge_object.compressed_imgmsg_to_cv2(img.message)
             img = image_preprocessing(img)  # -> each image is of dimensions (1, 48x96=4608)
+            # print("img", img, img.shape)
 
             # hack to get the timestamp of each image in <float 'secs.nsecs'> format instead of <int 'rospy.rostime.Time'>
             temp_timestamp = ext_images[num].timestamp

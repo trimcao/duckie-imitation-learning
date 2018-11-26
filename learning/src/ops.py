@@ -21,7 +21,7 @@ def conv2d(input_, output_dim, k_h, k_w, d_h, d_w, stddev=0.02, name='conv2d', b
               regularizer=tf.contrib.layers.l2_regularizer(weight_decay),
               initializer=tf.truncated_normal_initializer(stddev=stddev))
         # try a quick fix
-        input_ = tf.cast(input_, 'float32')
+        # input_ = tf.cast(input_, 'float32')
         conv = tf.nn.conv2d(input_, w, strides=[1, d_h, d_w, 1], padding='SAME')
         if bias:
             biases = tf.get_variable('bias', [output_dim], initializer=tf.constant_initializer(0.0))
