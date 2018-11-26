@@ -4,7 +4,7 @@ import os
 from tensorflow.python.tools import freeze_graph
 
 os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
-os.environ["CUDA_VISIBLE_DEVICES"]="3"
+os.environ["CUDA_VISIBLE_DEVICES"]="0"
 
 def main():
 
@@ -23,14 +23,15 @@ def main():
         os.makedirs(directory)
 
     # define the checkpoint/weights you want to freeze inside the graph
-    input_checkpoint = os.path.join(os.getcwd(), model_name, 'tensorflow_logs', 'train-90')
+    input_checkpoint = os.path.join(os.getcwd(), model_name, 'tensorflow_logs', 'train-900')
 
     # define the name of the prediction output node
     # This name can be easily extracted using Tensorboard. In GRAPHS tab of Tensorboard, check the inputs of Loss scope.
     # In this case they are "vel_true" and "ConvNet/fc_layer_2/BiasAdd".The CNN's predictions are provided from the
     # "ConvNet/fc_layer_2/BiasAdd" element, whereas the true omega velocities from the "vel_true". Here we have to define
     # the element which provides the CNN's predictions and thus we defined as output_node_names the "ConvNet/fc_layer_2/BiasAdd".
-    output_node_names = "ConvNet/fc_layer_2/BiasAdd"
+    # output_node_names = "ConvNet/fc_layer_2/BiasAdd"
+    output_node_names = "ConvNet/Flatten/flatten/Reshape"
 
     # The following settings should remain the same
     input_saver = ""

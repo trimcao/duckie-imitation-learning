@@ -16,7 +16,7 @@ def main():
     # print(file_path_train)
 
     # define batch_size (e.g 50, 100)
-    batch_size = 100
+    batch_size = 50
 
     # define which optimizer you want to use (e.g "Adam", "GDS"). For "Adam" and "GDS" this script will take care the rest.
     # ATTENTION !! If you want to choose a different optimizer from these two, you will have to add it in the training functions.
@@ -26,7 +26,7 @@ def main():
     learning_rate = 1E-4
 
     # define total epochs (e.g 1000, 5000, 10000)
-    epochs = 500
+    epochs = 1000
 
     # read train data
     print('Reading train dataset')

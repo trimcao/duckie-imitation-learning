@@ -2,3 +2,4 @@
 data/
 learned_models/
 *virtualenv*
+*.pyc

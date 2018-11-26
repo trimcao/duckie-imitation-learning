@@ -122,10 +122,10 @@ class CNN_training:
 
             net = pwise_block(net, 1280, is_train, name='conv9_1')
             net = global_avg(net)
-            logits = flatten(conv_1x1(net, num_classes, name='logits'))
+            pred = flatten(conv_1x1(net, num_classes, name='pred'))
 
             # pred = tf.nn.softmax(logits, name='prob')
-            return logits
+            return pred
 
             # # define the 4-d tensor expected by TensorFlow
             # # [-1: arbitrary num of images, img_height, img_width, num_channels]
