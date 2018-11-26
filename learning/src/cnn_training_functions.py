@@ -4,6 +4,7 @@ import tensorflow as tf
 import numpy as np
 import pandas as pd
 import os
+from ops import *
 
 def load_data(file_path):
     '''
@@ -87,35 +88,72 @@ class CNN_training:
 
         :return: output layer
         '''
-
+        exp = 6  # expansion ratio
+        is_train=True
+        reuse=False
+        num_classes = 2
         with tf.variable_scope('ConvNet', reuse=tf.AUTO_REUSE):
+            net = conv2d_block(x, 32, 3, 2, is_train, name='conv1_1')  # size/2
 
-            # define the 4-d tensor expected by TensorFlow
-            # [-1: arbitrary num of images, img_height, img_width, num_channels]
-            x_img = tf.reshape(x, [-1, 48, 96, 1])
+            net = res_block(net, 1, 16, 1, is_train, name='res2_1')
 
-            # define 1st convolutional layer
-            hl_conv_1 = tf.layers.conv2d(x_img, kernel_size=5, filters=2, padding="valid",
-                                         activation=tf.nn.relu, name="conv_layer_1")
+            net = res_block(net, exp, 24, 2, is_train, name='res3_1')  # size/4
+            net = res_block(net, exp, 24, 1, is_train, name='res3_2')
 
-            max_pool_1 = tf.layers.max_pooling2d(hl_conv_1, pool_size=2, strides=2)
+            net = res_block(net, exp, 32, 2, is_train, name='res4_1')  # size/8
+            net = res_block(net, exp, 32, 1, is_train, name='res4_2')
+            net = res_block(net, exp, 32, 1, is_train, name='res4_3')
 
-            # define 2nd convolutional layer
-            hl_conv_2 = tf.layers.conv2d(max_pool_1, kernel_size=5, filters=8, padding="valid",
-                                         activation=tf.nn.relu, name="conv_layer_2")
+            net = res_block(net, exp, 64, 1, is_train, name='res5_1')
+            net = res_block(net, exp, 64, 1, is_train, name='res5_2')
+            net = res_block(net, exp, 64, 1, is_train, name='res5_3')
+            net = res_block(net, exp, 64, 1, is_train, name='res5_4')
 
-            max_pool_2 = tf.layers.max_pooling2d(hl_conv_2, pool_size=2, strides=2)
+            net = res_block(net, exp, 96, 2, is_train, name='res6_1')  # size/16
+            net = res_block(net, exp, 96, 1, is_train, name='res6_2')
+            net = res_block(net, exp, 96, 1, is_train, name='res6_3')
 
-            # flatten tensor to connect it with the fully connected layers
-            conv_flat = tf.layers.flatten(max_pool_2)
+            net = res_block(net, exp, 160, 2, is_train, name='res7_1')  # size/32
+            net = res_block(net, exp, 160, 1, is_train, name='res7_2')
+            net = res_block(net, exp, 160, 1, is_train, name='res7_3')
 
-            # add 1st fully connected layers to the neural network
-            hl_fc_1 = tf.layers.dense(inputs=conv_flat, units=64, activation=tf.nn.relu, name="fc_layer_1")
+            net = res_block(net, exp, 320, 1, is_train, name='res8_1', shortcut=False)
 
-            # add 2nd fully connected layers to predict the driving commands
-            hl_fc_2 = tf.layers.dense(inputs=hl_fc_1, units=2, name="fc_layer_2")
+            net = pwise_block(net, 1280, is_train, name='conv9_1')
+            net = global_avg(net)
+            logits = flatten(conv_1x1(net, num_classes, name='logits'))
 
-            return hl_fc_2
+            # pred = tf.nn.softmax(logits, name='prob')
+            return logits
+
+            # # define the 4-d tensor expected by TensorFlow
+            # # [-1: arbitrary num of images, img_height, img_width, num_channels]
+            # x_img = tf.reshape(x, [-1, 48, 96, 1])
+
+            # # define 1st convolutional layer
+            # hl_conv_1 = tf.layers.conv2d(x_img, kernel_size=5, filters=2, padding="valid",
+            #                              activation=tf.nn.relu, name="conv_layer_1")
+
+            # max_pool_1 = tf.layers.max_pooling2d(hl_conv_1, pool_size=2, strides=2)
+
+            # # define 2nd convolutional layer
+            # hl_conv_2 = tf.layers.conv2d(max_pool_1, kernel_size=5, filters=8, padding="valid",
+            #                              activation=tf.nn.relu, name="conv_layer_2")
+
+            # max_pool_2 = tf.layers.max_pooling2d(hl_conv_2, pool_size=2, strides=2)
+
+            # # flatten tensor to connect it with the fully connected layers
+            # conv_flat = tf.layers.flatten(max_pool_2)
+
+            # # add 1st fully connected layers to the neural network
+            # hl_fc_1 = tf.layers.dense(inputs=conv_flat, units=64, activation=tf.nn.relu, name="fc_layer_1")
+
+            # # add 2nd fully connected layers to predict the driving commands
+            # hl_fc_2 = tf.layers.dense(inputs=hl_fc_1, units=2, name="fc_layer_2")
+
+            # return hl_fc_2
+
+            
 
     def epoch_iteration(self, data_size, x_data, y_data, mode):
         '''
@@ -226,7 +264,7 @@ class CNN_training:
                     print("Epoch: {:04d} , train_loss = {:.6f} , test_loss = {:.6f}".format(epoch+1, avg_train_loss, avg_test_loss))
 
                 # save weights every 100 epochs
-                if epoch % 30 == 0:
+                if epoch % 100 == 0:
                     saver.save(self.sess, logs_train_path, epoch)
 
         # close summary writer

@@ -30,7 +30,7 @@ def download_bag_files(urls):
             bag_name = os.path.join(directory, bag_ID + ".bag")
 
         if not os.path.isfile(bag_name):
-
+            print("Downloading {}.".format(bag_ID))
             # download file and save it to a bag file
             r = requests.get(link, allow_redirects=True)
             open(bag_name, 'wb').write(r.content)

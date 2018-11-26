@@ -46,6 +46,10 @@ install-dependencies:
 learn-regular:
 				. $(VIRTUALENV)/bin/activate; \
 				python src/cnn_training_tensorflow.py; \
+				# python src/freeze_graph.py;
+
+freeze-graph:
+				. $(VIRTUALENV)/bin/activate; \
 				python src/freeze_graph.py;
 
 regular_copy_for_submission:
