@@ -167,9 +167,9 @@ class CNN_training:
 
         return pred_loss
 
-    def training(self, model_name, train_velocities, train_images, test_velocities, test_images):
+    def training(self, model_name, train_velocities, train_images, test_velocities, test_images, save_frequency, print_frequency):
 
-        print('Tensorflow version:', tf.__version__)
+        # print('Tensorflow version:', tf.__version__)
 
         # define paths to save the TensorFlow logs
         model_path = os.path.join(os.getcwd(), model_name, 'tensorflow_logs')
@@ -237,11 +237,11 @@ class CNN_training:
                 test_writer.add_summary(man_loss_summary, epoch)
 
                 # print train and test loss to monitor progress during training every 50 epochs
-                if epoch % 10 == 0:
+                if epoch % print_frequency == 0:
                     print("Epoch: {:04d} , train_loss = {:.6f} , test_loss = {:.6f}".format(epoch+1, avg_train_loss, avg_test_loss))
 
                 # save weights every 100 epochs
-                if epoch % 30 == 0:
+                if epoch % save_frequency == 0:
                     saver.save(self.sess, logs_train_path, epoch)
 
         # close summary writer

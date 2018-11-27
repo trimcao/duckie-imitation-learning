@@ -45,7 +45,7 @@ install-dependencies:
 
 learn-regular:
 				. $(VIRTUALENV)/bin/activate; \
-				python src/cnn_training_tensorflow.py; \
+				python src/cnn_training_tensorflow.py --batch-size 32 --learning-rate 1e-5 --epochs 10 --optimizer GDS --save-frequency 1 --print-frequency 1; \
 				# python src/freeze_graph.py;
 
 freeze-graph:
