@@ -26,8 +26,9 @@ install-dependencies:
 regular_extract_data:
 				. $(VIRTUALENV)/bin/activate; \
 				python src/download_logs.py; \
-				python src/extract_data.py; \
+				python src/extract_data.py --images-per-hdf 15000; \
 				# rm -rf data/bag_files;
 
 regular_copy_for_learning:
-				cp -r data ../learning;
+				cp -r data/test ../learning/data/; \
+				cp -r data/train ../learning/data/;

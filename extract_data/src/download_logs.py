@@ -56,7 +56,7 @@ def main():
         # "20180108141448_a313": r"http://ipfs.duckietown.org:8080/ipfs/QmUbtwQ3QZKmmz5qTjKM3z8LJjsrKBWLUnnzoE5L4M7y7J/logs/20180108141448_a313.bag",
         # "20180108141719_a313": r"http://ipfs.duckietown.org:8080/ipfs/QmUbtwQ3QZKmmz5qTjKM3z8LJjsrKBWLUnnzoE5L4M7y7J/logs/20180108141719_a313.bag",
 
-        # # "20170925205642_bumblebe": r"http://ipfs.duckietown.org:8080/ipfs/QmUbtwQ3QZKmmz5qTjKM3z8LJjsrKBWLUnnzoE5L4M7y7J/logs/20170925205642_bumblebe.bag",
+        # "20170925205642_bumblebe": r"http://ipfs.duckietown.org:8080/ipfs/QmUbtwQ3QZKmmz5qTjKM3z8LJjsrKBWLUnnzoE5L4M7y7J/logs/20170925205642_bumblebe.bag",
         # "20171113190125_sharkduc": r"http://ipfs.duckietown.org:8080/ipfs/QmUbtwQ3QZKmmz5qTjKM3z8LJjsrKBWLUnnzoE5L4M7y7J/logs/20171113190125_sharkduc.bag",
         "20171115200334_raven": r"http://ipfs.duckietown.org:8080/ipfs/QmUbtwQ3QZKmmz5qTjKM3z8LJjsrKBWLUnnzoE5L4M7y7J/logs/20171115200334_raven.bag",
         "20171128034730_shamrock": r"http://ipfs.duckietown.org:8080/ipfs/QmUbtwQ3QZKmmz5qTjKM3z8LJjsrKBWLUnnzoE5L4M7y7J/logs/20171128034730_shamrock.bag",

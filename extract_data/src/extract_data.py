@@ -9,6 +9,7 @@ import cv_bridge
 import cv2
 from copy import copy
 from extract_data_functions import image_preprocessing, synchronize_data
+import argparse
 
 # A collection of ros messages coming from a single topic.
 MessageCollection = collections.namedtuple("MessageCollection", ["topic", "type", "messages"])
@@ -39,7 +40,7 @@ def extract_messages(path, requested_topics):
 
     return extracted_messages
 
-def main():
+def main(images_per_hdf=15000):
 
     # print('\nPandas in extract_data version:', pd.__version__, '\n')
 
@@ -186,36 +187,10 @@ def main():
     # define size of train dataset
     train_size = int(0.9 * synch_data.shape[0])
 
-    # create train dataframe
-    df_data_train = pd.DataFrame({
-        'img_timestamp': synch_data[:train_size, 0],
-        'vel_timestamp': synch_data[:train_size, 1],
-        'vel_left': synch_data[:train_size, 2],
-        'vel_right': synch_data[:train_size, 3],
-        'bag_ID': synch_data[:train_size, 4],
-    })
+    ##################################
+    # Split data into multiple data frames
+    ##################################
 
-    # create train dataframe for images in order to save them in the same .h5 file with the rest train data
-    df_img_train = pd.DataFrame({
-        'img': [ synch_imgs[:train_size, :] ]
-    })
-
-    # create test dataframe
-    df_data_test = pd.DataFrame({
-        'img_timestamp': synch_data[train_size:, 0],
-        'vel_timestamp': synch_data[train_size:, 1],
-        'vel_left': synch_data[train_size:, 2],
-        'vel_right': synch_data[train_size:, 3],
-        'bag_ID': synch_data[train_size:, 4],
-    })
-
-    # create test dataframe for images in order to save them in the same .h5 file with the rest test data
-    df_img_test = pd.DataFrame({
-        'img': [ synch_imgs[train_size:, :] ]
-    })
-
-
-    # save train and test datasets to .h5 files
 
     # ATTENTION 1 !!
     #  If the datasets become too large, you could face memory errors on laptops.
@@ -231,28 +206,80 @@ def main():
     # the key does not change, we will check if the .h5 file exists before saving the new data, and if it exists we will
     # first remove the previous file ad then save the new data.
 
-    # define the names of the train and test .h5 files
-    train_set_name = os.path.join(train_dir, 'train_set.h5')
-    test_set_name = os.path.join(test_dir, 'test_set.h5')
+    # save train and test datasets to .h5 files
+    num_train_files = (train_size // images_per_hdf)
+    if train_size % images_per_hdf != 0:
+        num_train_files += 1
+    
+    for train_file_idx in range(num_train_files):
+        # create train dataframe
+        i = train_file_idx
+        df_data_train = pd.DataFrame({
+            'img_timestamp': synch_data[images_per_hdf*i:min(images_per_hdf*(i+1),train_size), 0],
+            'vel_timestamp': synch_data[images_per_hdf*i:min(images_per_hdf*(i+1),train_size), 1],
+            'vel_left': synch_data[images_per_hdf*i:min(images_per_hdf*(i+1),train_size), 2],
+            'vel_right': synch_data[images_per_hdf*i:min(images_per_hdf*(i+1),train_size), 3],
+            'bag_ID': synch_data[images_per_hdf*i:min(images_per_hdf*(i+1),train_size), 4],
+        })
 
-    # check if these two files exist in the data directory and if yes remove them before saving the new files
-    if os.path.isfile(train_set_name):
-        os.remove(train_set_name)
+        # create train dataframe for images in order to save them in the same .h5 file with the rest train data
+        df_img_train = pd.DataFrame({
+            'img': [ synch_imgs[images_per_hdf*i:min(images_per_hdf*(i+1),train_size), :] ]
+        })
 
-    if os.path.isfile(test_set_name):
-        os.remove(test_set_name)
+        # define the names of the train and test .h5 files
+        train_set_name = os.path.join(train_dir, 'train_set_'+str(train_file_idx)+'.h5')
+        # check if these two files exist in the data directory and if yes remove them before saving the new files
+        if os.path.isfile(train_set_name):
+            os.remove(train_set_name)
+        # df_all_train.to_hdf(train_set_name, 'table')
+        df_data_train.to_hdf(train_set_name, key='data')
+        df_img_train.to_hdf(train_set_name, key='images')
 
-    # df_all_train.to_hdf(train_set_name, 'table')
-    df_data_train.to_hdf(train_set_name, key='data')
-    df_img_train.to_hdf(train_set_name, key='images')
+        print("\nFile {} stores {} training datasets and saved in {} "
+          "directory.".format(train_set_name, df_data_train.shape[0], data_directory))
+    
+    all_size = synch_data.shape[0]
+    test_size = synch_data.shape[0] - train_size
+    num_test_files = test_size // images_per_hdf
+    if test_size % images_per_hdf != 0:
+        num_test_files += 1
+
+    for test_file_idx in range(num_test_files):
+        i = test_file_idx
+        # create test dataframe
+        df_data_test = pd.DataFrame({
+            'img_timestamp': synch_data[train_size+i*images_per_hdf:min(train_size+(i+1)*images_per_hdf,all_size) , 0],
+            'vel_timestamp': synch_data[train_size+i*images_per_hdf:min(train_size+(i+1)*images_per_hdf,all_size), 1],
+            'vel_left': synch_data[train_size+i*images_per_hdf:min(train_size+(i+1)*images_per_hdf,all_size), 2],
+            'vel_right': synch_data[train_size+i*images_per_hdf:min(train_size+(i+1)*images_per_hdf,all_size), 3],
+            'bag_ID': synch_data[train_size+i*images_per_hdf:min(train_size+(i+1)*images_per_hdf,all_size), 4],
+        })
+
+        # create test dataframe for images in order to save them in the same .h5 file with the rest test data
+        df_img_test = pd.DataFrame({
+            'img': [ synch_imgs[train_size+i*images_per_hdf:min(train_size+(i+1)*images_per_hdf,all_size), :] ]
+        })
+
+        # define the names of the test .h5 files
+        test_set_name = os.path.join(test_dir, 'test_set_'+str(test_file_idx)+'.h5')
+        # check if these two files exist in the data directory and if yes remove them before saving the new files
+        if os.path.isfile(test_set_name):
+            os.remove(test_set_name)
+        # df_all_test.to_hdf(test_set_name, 'table')
+        df_data_test.to_hdf(test_set_name, key='data')
+        df_img_test.to_hdf(test_set_name, key='images')
+
+        print("\nFile {} stores {} test datasets and saved in {} "
+          "directory.".format(test_set_name, df_data_test.shape[0], data_directory))
 
 
-    # df_all_test.to_hdf(test_set_name, 'table')
-    df_data_test.to_hdf(test_set_name, key='data')
-    df_img_test.to_hdf(test_set_name, key='images')
-
-    print("\nThe total {} data were split into {} training and {} test datasets and saved in {} "
-          "directory.".format(synch_data.shape[0], df_data_train.shape[0], df_data_test.shape[0], data_directory))
+    # print("\nThe total {} data were split into {} training and {} test datasets and saved in {} "
+        #   "directory.".format(synch_data.shape[0], df_data_train.shape[0], df_data_test.shape[0], data_directory))
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Extract data from logs')
+    parser.add_argument('--images-per-hdf', type=int, default=15000)
+    args = parser.parse_args()
+
+    main(args.images_per_hdf)
